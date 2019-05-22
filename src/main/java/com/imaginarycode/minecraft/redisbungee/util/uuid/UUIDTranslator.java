@@ -38,7 +38,8 @@ public final class UUIDTranslator {
         uuidToNameMap.put(uuid, entry);
     }
 
-    public final UUID getTranslatedUuid(@NonNull String player, boolean expensiveLookups) {
+    @SuppressWarnings("deprecation")
+	public final UUID getTranslatedUuid(@NonNull String player, boolean expensiveLookups) {
         // If the player is online, give them their UUID.
         // Remember, local data > remote data.
         if (ProxyServer.getInstance().getPlayer(player) != null)
@@ -112,7 +113,8 @@ public final class UUIDTranslator {
         return null; // Nope, game over!
     }
 
-    public final String getNameFromUuid(@NonNull UUID player, boolean expensiveLookups) {
+    @SuppressWarnings("deprecation")
+	public final String getNameFromUuid(@NonNull UUID player, boolean expensiveLookups) {
         // If the player is online, give them their UUID.
         // Remember, local data > remote data.
         if (ProxyServer.getInstance().getPlayer(player) != null)

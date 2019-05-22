@@ -33,7 +33,7 @@ public class NameFetcher {
 
         List<String> humanNames = new ArrayList<>();
         for (Name name : names) {
-            humanNames.add(name.name);
+           humanNames.add(name.name);
         }
         return humanNames;
     }
@@ -41,5 +41,19 @@ public class NameFetcher {
     public static class Name {
         private String name;
         private long changedToAt;
+        
+        public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+        
+		public long getChangedToAt() {
+			return changedToAt;
+		}
+		public void setChangedToAt(long changedToAt) {
+			this.changedToAt = changedToAt;
+		}		
     }
 }

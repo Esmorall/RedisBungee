@@ -19,7 +19,6 @@ import lombok.NonNull;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
@@ -86,6 +85,10 @@ public final class RedisBungee extends Plugin {
     final List<String> getServerIds() {
         return serverIds;
     }
+    
+    public boolean isUsingLua() {
+    	return this.usingLua;
+    }
 
     private List<String> getCurrentServerIds(boolean nag, boolean lagged) {
         try (Jedis jedis = pool.getResource()) {
@@ -134,8 +137,8 @@ public final class RedisBungee extends Plugin {
             return serverToPlayersCache.get(SERVER_TO_PLAYERS_KEY, new Callable<Multimap<String, UUID>>() {
                 @Override
                 public Multimap<String, UUID> call() throws Exception {
+                	@SuppressWarnings("unchecked")
                     Collection<String> data = (Collection<String>) serverToPlayersScript.eval(ImmutableList.<String>of(), getServerIds());
-
                     ImmutableMultimap.Builder<String, UUID> builder = ImmutableMultimap.builder();
                     String key = null;
                     for (String s : data) {
@@ -222,8 +225,8 @@ public final class RedisBungee extends Plugin {
 
     @Override
     public void onEnable() {
-        ThreadFactory factory = ((ThreadPoolExecutor) getExecutorService()).getThreadFactory();
-        getExecutorService().shutdownNow();
+        ThreadFactory factory = ((ThreadPoolExecutor) getProxy().getScheduler().unsafe().getExecutorService(this)).getThreadFactory();
+        getProxy().getScheduler().unsafe().getExecutorService(this).shutdownNow();
         ScheduledExecutorService service;
         try {
             Field field = Plugin.class.getDeclaredField("service");
@@ -293,8 +296,8 @@ public final class RedisBungee extends Plugin {
                 getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.LastSeenCommand(this));
                 getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.IpCommand(this));
             }
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.SendToAll(this));
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerId(this));
+            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.SendToAll());
+            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerId());
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerIds());
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlayerProxyCommand(this));
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlistCommand(this));
@@ -465,12 +468,13 @@ public final class RedisBungee extends Plugin {
                     } catch (NumberFormatException ignored) {
                     }
                 }
-
+                RedisBungee plugin = this;
                 FutureTask<Void> task2 = new FutureTask<>(new Callable<Void>() {
+                	
                     @Override
                     public Void call() throws Exception {
                         httpClient = new OkHttpClient();
-                        Dispatcher dispatcher = new Dispatcher(getExecutorService());
+                        Dispatcher dispatcher = new Dispatcher(getProxy().getScheduler().unsafe().getExecutorService(plugin));
                         httpClient.setDispatcher(dispatcher);
                         NameFetcher.setHttpClient(httpClient);
                         UUIDFetcher.setHttpClient(httpClient);

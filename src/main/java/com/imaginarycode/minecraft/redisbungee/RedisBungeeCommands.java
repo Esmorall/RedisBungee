@@ -231,11 +231,9 @@ class RedisBungeeCommands {
     }
 
     public static class SendToAll extends Command {
-        private final RedisBungee plugin;
 
-        SendToAll(RedisBungee plugin) {
+        SendToAll() {
             super("sendtoall", "redisbungee.command.sendtoall", "rsendtoall");
-            this.plugin = plugin;
         }
 
         @Override
@@ -254,11 +252,9 @@ class RedisBungeeCommands {
     }
 
     public static class ServerId extends Command {
-        private final RedisBungee plugin;
 
-        ServerId(RedisBungee plugin) {
+        ServerId() {
             super("serverid", "redisbungee.command.serverid", "rserverid");
-            this.plugin = plugin;
         }
 
         @Override

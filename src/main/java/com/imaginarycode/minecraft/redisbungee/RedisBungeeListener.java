@@ -56,13 +56,12 @@ public class RedisBungeeListener implements Listener {
 
                     // We make sure they aren't trying to use an existing player's name.
                     // This is problematic for online-mode servers as they always disconnect old clients.
-                    if (plugin.getProxy().getConfig().isOnlineMode()) {
+                    if (event.getConnection().isOnlineMode()) {
                         ProxiedPlayer player = plugin.getProxy().getPlayer(event.getConnection().getName());
 
                         if (player != null) {
                             event.setCancelled(true);
-                            // TODO: Make it accept a BaseComponent[] like everything else.
-                            event.setCancelReason(TextComponent.toLegacyText(ONLINE_MODE_RECONNECT));
+                            event.setCancelReason(new TextComponent(ONLINE_MODE_RECONNECT));
                             return null;
                         }
                     }
@@ -70,8 +69,7 @@ public class RedisBungeeListener implements Listener {
                     for (String s : plugin.getServerIds()) {
                         if (jedis.sismember("proxy:" + s + ":usersOnline", event.getConnection().getUniqueId().toString())) {
                             event.setCancelled(true);
-                            // TODO: Make it accept a BaseComponent[] like everything else.
-                            event.setCancelReason(TextComponent.toLegacyText(ALREADY_LOGGED_IN));
+                            event.setCancelReason(new TextComponent(ALREADY_LOGGED_IN));
                             return null;
                         }
                     }
