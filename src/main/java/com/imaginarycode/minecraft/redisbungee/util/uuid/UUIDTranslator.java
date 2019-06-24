@@ -1,6 +1,5 @@
 package com.imaginarycode.minecraft.redisbungee.util.uuid;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
@@ -42,8 +41,9 @@ public final class UUIDTranslator {
 	public final UUID getTranslatedUuid(@NonNull String player, boolean expensiveLookups) {
         // If the player is online, give them their UUID.
         // Remember, local data > remote data.
-        if (ProxyServer.getInstance().getPlayer(player) != null)
+        if (ProxyServer.getInstance().getPlayer(player) != null) {
             return ProxyServer.getInstance().getPlayer(player).getUniqueId();
+        }
 
         // Check if it exists in the map
         CachedUUIDEntry cachedUUIDEntry = nameToUuidMap.get(player.toLowerCase());
@@ -63,12 +63,14 @@ public final class UUIDTranslator {
             // Reconstruct the UUID
             return UUIDFetcher.getUUID(player);
         }
-
+        
+        /*
         // If we are in offline mode, UUID generation is simple.
         // We don't even have to cache the UUID, since this is easy to recalculate.
         if (!plugin.getProxy().getConfig().isOnlineMode()) {
             return UUID.nameUUIDFromBytes(("OfflinePlayer:" + player).getBytes(Charsets.UTF_8));
         }
+        */
 
         // Let's try Redis.
         try (Jedis jedis = plugin.getPool().getResource()) {
